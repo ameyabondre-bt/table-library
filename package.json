@@ -1,0 +1,31 @@
+{
+  "name": "smart-table-library",
+  "version": "1.0.0",
+  "description": "A lightweight, customizable JavaScript table library with filtering, actions, and data customization features.",
+  "main": "src/table-library.js",
+  "keywords": [
+    "table",
+    "javascript",
+    "frontend",
+    "data-table",
+    "sortable-table",
+    "filterable-table",
+    "customizable-table",
+    "table-library"
+  ],
+  "author": "Ajay Goswami",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajay-goswami/table-library.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ajay-goswami/table-library/issues"
+  },
+  "homepage": "https://ajay-goswami.github.io/table-library/",
+  "files": [
+    "src/",
+    "README.md",
+    "package.json"
+  ]
+}
