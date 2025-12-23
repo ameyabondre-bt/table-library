@@ -22,11 +22,6 @@
         ...config,
       };
 
-      this.sortState = {
-        colIndex: null,
-        direction: null, // 'asc' | 'desc'
-      };
-
       this.processedData = [];
       this.processedHeadings = [];
       this.filteredData = [];
@@ -111,105 +106,6 @@
     }
 
     /**
-     * Check if a column contains numeric data
-     */
-    isNumericColumn(colIndex) {
-      return this.processedData.some((row) => {
-        const val = row[colIndex];
-        return typeof val === "number" && !isNaN(val);
-      });
-    }
-
-    /**
-     * Calculate metric (sum, avg, max, min) for a specific column
-     */
-    calculateMetric(colIndex, type) {
-      const values = this.filteredData
-        .map((row) => row[colIndex])
-        .filter((v) => typeof v === "number" && !isNaN(v));
-
-      if (values.length === 0) return "";
-
-      switch (type) {
-        case "sum":
-          return values.reduce((a, b) => a + b, 0).toFixed(2);
-        case "avg":
-          return (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2);
-        case "max":
-          return Math.max(...values).toFixed(2);
-        case "min":
-          return Math.min(...values).toFixed(2);
-        default:
-          return "";
-      }
-    }
-
-    /**
-     * Sort table data by a specific column
-     */
-    sortByColumn(colIndex) {
-      const { colIndex: activeCol, direction } = this.sortState;
-
-      let newDirection = "asc";
-      if (activeCol === colIndex && direction === "asc") {
-        newDirection = "desc";
-      } else if (activeCol === colIndex && direction === "desc") {
-        newDirection = null;
-      }
-
-      this.sortState = {
-        colIndex: newDirection ? colIndex : null,
-        direction: newDirection,
-      };
-
-      if (!newDirection) {
-        this.displayData = [...this.processedData];
-      } else {
-        this.displayData.sort((a, b) => {
-          const valA = a[colIndex];
-          const valB = b[colIndex];
-
-          if (typeof valA === "number" && typeof valB === "number") {
-            return newDirection === "asc" ? valA - valB : valB - valA;
-          }
-
-          return newDirection === "asc"
-            ? String(valA).localeCompare(String(valB))
-            : String(valB).localeCompare(String(valA));
-        });
-      }
-
-      this.filteredData = [...this.displayData];
-      this.refreshTableBody();
-    }
-
-    /**
-     * refresh table body
-     */
-    refreshTableBody() {
-      const tbody = document.querySelector(`#${this.config.tableID} tbody`);
-      if (!tbody) return;
-
-      tbody.innerHTML = this.displayData
-        .map(
-          (row, rowIndex) => `
-      <tr data-row-index="${rowIndex}">
-        ${row
-          .map(
-            (cell, colIndex) => `
-          <td data-heading="${this.processedHeadings[colIndex]}">
-            ${this.renderCell(cell, rowIndex, colIndex)}
-          </td>`
-          )
-          .join("")}
-      </tr>`
-        )
-        .join("");
-
-      this.updateRowCount();
-    }
-
-    /**
      * Generate HTML for the table including download button if configured
      */
     generateHTML(headings, data) {
@@ -238,29 +134,7 @@
                   .map(
                     (heading, i) => `
                   <th>
-                    <div class="table-header">
-                      <span 
-                        class="table-heading-text table-sortable" 
-                        data-col-index="${i}">
-                        ${heading}
-                        <span class="sort-icon">⇅</span>
-                      </span>
-                      ${
-                        this.isNumericColumn(i)
-                          ? `
-                            <select class="table-metric-dropdown" data-col-index="${i}">
-                              <option value=""></option>
-                              <option value="avg">Avg</option>
-                              <option value="sum">Sum</option>
-                              <option value="max">Max</option>
-                              <option value="min">Min</option>
-                            </select>
-                          `
-                          : ""
-                      }
-                    </div>
-
-                    <div class="table-metric-result" data-result-col="${i}"></div>
+                    <div>${heading}</div>
                     <input type="text" placeholder="Filter ${heading}" />
                   </th>
                 `
@@ -344,8 +218,8 @@
 
           return `
             <div class="table-library-action-cell ${hasCheckbox}">
-              <button class="table-library-action-btn" 
-                      data-fn="${cell.function}" 
+              <button class="table-library-action-btn"
+                      data-fn="${cell.function}"
                       data-row-index="${rowIndex}">
                 ${cell.placeholder || "Action"}
               </button>
@@ -354,7 +228,7 @@
                   ? `
                 <label class="table-library-checkbox-label">
                   <input type="checkbox" ${checkedAttr}
-                    class="table-library-action-checkbox" 
+                    class="table-library-action-checkbox"
                     data-row-index="${rowIndex}"
                     data-fn="${cell.function}" />
                   <span>${cell.checkboxLabel || "Mark"}</span>
@@ -504,29 +378,7 @@
         this.filteredData = visibleRowIndexes.map(
           (index) => this.displayData[index]
         );
-
-        // Update metric dropdowns
-        document.querySelectorAll(".table-metric-dropdown").forEach((dd) => {
-          if (dd.value) {
-            dd.dispatchEvent(new Event("change"));
-          }
-        });
       };
-
-      document.querySelectorAll(".table-sortable").forEach((el) => {
-        el.addEventListener("click", () => {
-          const colIndex = parseInt(el.dataset.colIndex);
-          this.sortByColumn(colIndex);
-
-          document.querySelectorAll(".sort-icon").forEach((icon) => {
-            icon.textContent = "⇅";
-          });
-
-          const icon = el.querySelector(".sort-icon");
-          if (this.sortState.direction === "asc") icon.textContent = "↑";
-          if (this.sortState.direction === "desc") icon.textContent = "↓";
-        });
-      });
 
       // Filter events
       document
@@ -608,28 +460,6 @@
                 cb.checked
               );
             }
-          });
-        });
-
-      // Dropdown change events
-      document
-        .querySelectorAll(".table-metric-dropdown")
-        .forEach((dropdown) => {
-          dropdown.addEventListener("change", (e) => {
-            const colIndex = parseInt(e.target.dataset.colIndex);
-            const metric = e.target.value;
-
-            const resultEl = document.querySelector(
-              `.table-metric-result[data-result-col="${colIndex}"]`
-            );
-
-            if (!metric) {
-              resultEl.textContent = "";
-              return;
-            }
-
-            const result = this.calculateMetric(colIndex, metric);
-            resultEl.textContent = `${metric.toUpperCase()}: ${result}`;
           });
         });
     }
