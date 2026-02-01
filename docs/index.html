@@ -1,164 +1,369 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Table Library Demo</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/gh/ameyabondre-bt/table-library@main/src/table-library.css"
-    />
-    <script src="https://cdn.jsdelivr.net/gh/ameyabondre-bt/table-library@main/src/table-library.js"></script>
-    <!-- <link href="../src/table-library.css" rel="stylesheet" />
-    <script src="../src/testing.js"></script> -->
-    <!-- <script src="../src/table-library.js"></script> -->
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        padding: 20px;
-        background: #f5f5f5;
-      }
-      .container {
-        max-width: 1400px;
-        margin: 0 auto;
-      }
-      h1 {
-        color: #333;
-        text-align: center;
-        margin-bottom: 30px;
-      }
-      table-library-download-btn {
-        background: var(--table-primary);
-        color: #f90000;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-      }
-      table-library-download-btn:hover {
-        background: var(--table-primary-dark);
-      }
-      table-library-download-btn:active {
-        transform: scale(0.95);
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h1>Table Library Demo</h1>
-      <div id="demo-table"></div>
-    </div>
 
-    <script>
-      const headings = [
-        "Center",
-        "Count",
-        "Active",
-        "Join Date",
-        "Profile",
-        "Actions",
-      ];
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Table Library Demo</title>
+  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ameyabondre-bt/table-library@main/src/table-library.css" /> -->
+  <!-- <script src="https://cdn.jsdelivr.net/gh/ameyabondre-bt/table-library@main/src/table-library.js"></script> -->
+  <link href="../src/table-library.css" rel="stylesheet" />
+  <!-- <script src="../src/testing.js"></script>  -->
 
-      const data = [
-        [
-          "Pimple Saudagar",
-          37,
-          false,
-          new Date("2024-01-01"),
-          { city: "Mumbai", dept: "HR" },
-          {
-            placeholder: "Send WhatsApp",
-            type: "button",
-            checkbox: true,
-            checkboxValue: false,
-            function: "sendWhatsApp",
-          },
-        ],
-        [
-          "Kothrud",
-          0,
-          true,
-          new Date(),
-          { city: "Pune", tags: ["tech", "startup"] },
-          {
-            placeholder: "Open Profile",
-            type: "button",
-            function: "openProfile",
-          },
-        ],
-        [
-          "Baner",
-          15,
-          true,
-          new Date("2023-12-15"),
-          { city: "Pune", employees: 25 },
-          {
-            placeholder: "Download Report",
-            type: "button",
-            checkbox: true,
-            checkboxValue: true,
-            function: "downloadReport",
-          },
-        ],
-      ];
+  <script src="../src/table-library.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
 
-      const modifyConfig = {
-        Active: (value) => (value ? "✅ Active" : "❌ Inactive"),
-        Center: (value) => "🏫 " + value,
-        "Join Date": (value) => {
-          if (!value) return "-";
-          const daysAgo = Math.floor(
-            (new Date() - new Date(value)) / (1000 * 60 * 60 * 24)
-          );
-          return `${value.toLocaleDateString()} (${daysAgo} days ago)`;
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    table-library-download-btn {
+      background: var(--table-primary);
+      color: #f90000;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    table-library-download-btn:hover {
+      background: var(--table-primary-dark);
+    }
+
+    table-library-download-btn:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Table Library Demo</h1>
+    <div id="demo-table"></div>
+  </div>
+
+  <script>
+    const headings = [
+      "Center",
+      "Count",
+      "Active",
+      "Join Date",
+      "Profile",
+      "Actions",
+      "Actions",
+      "Actions",
+      "Actions",
+      "Actions",
+      "Actions",
+      "Actions",
+      "Actions",
+      "Actions",
+      "Actions"
+    ];
+
+    const data = [
+      [
+        "Pimple Saudagar",
+        37,
+        false,
+        new Date("2024-01-01"),
+        { city: "Mumbai", dept: "HR" },
+        {
+          placeholder: "Send WhatsApp",
+          type: "button",
+          checkbox: true,
+          checkboxValue: false,
+          function: "sendWhatsApp",
         },
-      };
-
-      // Initialize table
-      initTableLibrary({
-        container: "#demo-table",
-        headings: headings,
-        data: data,
-        modifyConfig: modifyConfig,
-        downloadConfig: {
-          enable: true,
-          buttonText: "📥 Download Data",
-          // buttonClass: "table-library-download-btn user-custom-download-btn",
-          position: "top-left",
-          filename: "filtered-results.csv",
+        {
+          placeholder: "Send WhatsApp",
+          type: "button",
+          checkbox: true,
+          checkboxValue: false,
+          function: "sendWhatsApp",
         },
-      });
-      // initTableLibrary({
-      //   container: "#demo-table",
-      //   headings: headings,
-      //   data: data,
-      //   modifyConfig: modifyConfig,
-      // });
-
-      // User functions
-      function sendWhatsApp(rowData, rowIndex) {
-        alert(`📱 WhatsApp sent to ${rowData[0]}`);
-        console.log("WhatsApp function called with:", rowData);
-      }
-
-      function openProfile(rowData, rowIndex) {
-        alert(`👤 Opening profile for ${rowData[0]}`);
-        console.log("Profile data:", rowData[4]);
-      }
-
-      function downloadReport(rowData, rowIndex) {
-        alert(`📄 Downloading report for ${rowData[0]}`);
-        console.log("Report data:", rowData);
-      }
-
-      function downloadReportCheckbox(rowData, rowIndex, checked) {
-        if (checked) {
-          console.log(`✅ ${rowData[0]} - Auto-download enabled`);
-        } else {
-          console.log(`❌ ${rowData[0]} - Auto-download disabled`);
+        {
+          placeholder: "Send WhatsApp",
+          type: "button",
+          checkbox: true,
+          checkboxValue: false,
+          function: "sendWhatsApp",
+        },
+        {
+          placeholder: "Send WhatsApp",
+          type: "button",
+          checkbox: true,
+          checkboxValue: false,
+          function: "sendWhatsApp",
+        },
+        {
+          placeholder: "Send WhatsApp",
+          type: "button",
+          checkbox: true,
+          checkboxValue: false,
+          function: "sendWhatsApp",
+        },
+        {
+          placeholder: "Send WhatsApp",
+          type: "button",
+          checkbox: true,
+          checkboxValue: false,
+          function: "sendWhatsApp",
+        },
+        {
+          placeholder: "Send WhatsApp",
+          type: "button",
+          checkbox: true,
+          checkboxValue: false,
+          function: "sendWhatsApp",
+        },
+        {
+          placeholder: "Send WhatsApp",
+          type: "button",
+          checkbox: true,
+          checkboxValue: false,
+          function: "sendWhatsApp",
+        },
+        {
+          placeholder: "Send WhatsApp",
+          type: "button",
+          checkbox: true,
+          checkboxValue: false,
+          function: "sendWhatsApp",
+        },
+        {
+          placeholder: "Send WhatsApp",
+          type: "button",
+          checkbox: true,
+          checkboxValue: false,
+          function: "sendWhatsApp",
         }
+      ],
+      [
+        "Kothrud",
+        0,
+        true,
+        new Date(),
+        { city: "Pune", tags: ["tech", "startup"] },
+        {
+          placeholder: "Open Profile",
+          type: "button",
+          function: "openProfile",
+        },
+        {
+          placeholder: "Download Report",
+          type: "button",
+          checkbox: true,
+          checkboxValue: true,
+          function: "downloadReport",
+        },
+        {
+          placeholder: "Download Report",
+          type: "button",
+          checkbox: true,
+          checkboxValue: true,
+          function: "downloadReport",
+        },
+        {
+          placeholder: "Download Report",
+          type: "button",
+          checkbox: true,
+          checkboxValue: true,
+          function: "downloadReport",
+        },
+        {
+          placeholder: "Download Report",
+          type: "button",
+          checkbox: true,
+          checkboxValue: true,
+          function: "downloadReport",
+        },
+        {
+          placeholder: "Download Report",
+          type: "button",
+          checkbox: true,
+          checkboxValue: true,
+          function: "downloadReport",
+        },
+        {
+          placeholder: "Download Report",
+          type: "button",
+          checkbox: true,
+          checkboxValue: true,
+          function: "downloadReport",
+        },
+        {
+          placeholder: "Download Report",
+          type: "button",
+          checkbox: true,
+          checkboxValue: true,
+          function: "downloadReport",
+        },
+        {
+          placeholder: "Download Report",
+          type: "button",
+          checkbox: true,
+          checkboxValue: true,
+          function: "downloadReport",
+        },
+        {
+          placeholder: "Download Report",
+          type: "button",
+          checkbox: true,
+          checkboxValue: true,
+          function: "downloadReport",
+        },
+
+      ],
+      [
+        "Baner",
+        15,
+        true,
+        new Date("2023-12-15"),
+        { city: "Pune", employees: 25 },
+        {
+          placeholder: "Download Report",
+          type: "button",
+          checkbox: true,
+          checkboxValue: true,
+          function: "downloadReport",
+        },
+        {
+          placeholder: "Download Report",
+          type: "button",
+          checkbox: true,
+          checkboxValue: true,
+          function: "downloadReport",
+        },
+        {
+          placeholder: "Download Report",
+          type: "button",
+          checkbox: true,
+          checkboxValue: true,
+          function: "downloadReport",
+        },
+        {
+          placeholder: "Download Report",
+          type: "button",
+          checkbox: true,
+          checkboxValue: true,
+          function: "downloadReport",
+        },
+        {
+          placeholder: "Download Report",
+          type: "button",
+          checkbox: true,
+          checkboxValue: true,
+          function: "downloadReport",
+        },
+        {
+          placeholder: "Download Report",
+          type: "button",
+          checkbox: true,
+          checkboxValue: true,
+          function: "downloadReport",
+        },
+        {
+          placeholder: "Download Report",
+          type: "button",
+          checkbox: true,
+          checkboxValue: true,
+          function: "downloadReport",
+        },
+        {
+          placeholder: "Download Report",
+          type: "button",
+          checkbox: true,
+          checkboxValue: true,
+          function: "downloadReport",
+        },
+        {
+          placeholder: "Download Report",
+          type: "button",
+          checkbox: true,
+          checkboxValue: true,
+          function: "downloadReport",
+        },
+        {
+          placeholder: "Download Report",
+          type: "button",
+          checkbox: true,
+          checkboxValue: true,
+          function: "downloadReport",
+        }
+      ],
+    ];
+
+    const modifyConfig = {
+      Active: (value) => (value ? "✅ Active" : "❌ Inactive"),
+      Center: (value) => "🏫 " + value,
+      "Join Date": (value) => {
+        if (!value) return "-";
+        const daysAgo = Math.floor(
+          (new Date() - new Date(value)) / (1000 * 60 * 60 * 24)
+        );
+        return `${value.toLocaleDateString()} (${daysAgo} days ago)`;
+      },
+    };
+
+    // Initialize table
+    initTableLibrary({
+      container: "#demo-table",
+      headings: headings,
+      data: data,
+      modifyConfig: modifyConfig,
+      downloadConfig: {
+        enable: true,
+        buttonText: "📥 Download excel",
+        // buttonClass: "table-library-download-btn user-custom-download-btn",
+        position: "top-right",
+        filename: "filtered-results.xlsx",
+      },
+    });
+    // initTableLibrary({
+    //   container: "#demo-table",
+    //   headings: headings,
+    //   data: data,
+    //   modifyConfig: modifyConfig,
+    // });
+
+    // User functions
+    function sendWhatsApp(rowData, rowIndex) {
+      alert(`📱 WhatsApp sent to ${rowData[0]}`);
+      console.log("WhatsApp function called with:", rowData);
+    }
+
+    function openProfile(rowData, rowIndex) {
+      alert(`👤 Opening profile for ${rowData[0]}`);
+      console.log("Profile data:", rowData[4]);
+    }
+
+    function downloadReport(rowData, rowIndex) {
+      alert(`📄 Downloading report for ${rowData[0]}`);
+      console.log("Report data:", rowData);
+    }
+
+    function downloadReportCheckbox(rowData, rowIndex, checked) {
+      if (checked) {
+        console.log(`✅ ${rowData[0]} - Auto-download enabled`);
+      } else {
+        console.log(`❌ ${rowData[0]} - Auto-download disabled`);
       }
-    </script>
-  </body>
+    }
+  </script>
+</body>
+
 </html>
