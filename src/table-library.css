@@ -18,19 +18,11 @@
   --table-info: #3b82f6;
 }
 
-/* .table-library-container {
-  width: 100%;
-  overflow-x: auto;
-  border-radius: 14px;
-  margin: 0 auto;
-} */
 .table-library-container {
   width: 100%;
-  /* overflow-x: auto;  <-- REMOVED */
   border-radius: 14px;
   margin: 0 auto;
   display: flex;
-  /* Added to keep vertical stack neat */
   flex-direction: column;
 }
 
@@ -38,7 +30,6 @@
   overflow-x: auto;
   width: 100%;
   border-radius: 14px;
-  /* Optional: keeps the rounded look */
 }
 
 /* Fixed table styling to prevent half-white appearance */
@@ -98,23 +89,17 @@
   padding: 12px 14px;
   border-bottom: 1px solid var(--table-border);
   border-right: 1px solid var(--table-border);
-  /* Column separator */
   font-size: 14px;
   color: var(--table-text-dark);
-  /* white-space: nowrap; */
-  /* Commented out to allow wrapping */
   white-space: normal;
   text-align: center;
-  /* Center content horizontally */
   vertical-align: middle;
-  /* Center content vertically */
   transition: all 0.2s ease;
   background: inherit;
 }
 
 .table-library-container td:last-child {
   border-right: none;
-  /* No separator on last column */
 }
 
 /* Improved row styling for consistent backgrounds */
@@ -247,19 +232,12 @@
   accent-color: var(--table-success);
 }
 
-/* Text display - with wrapping */
+/* Text display */
 .table-library-text {
   display: inline-block;
   max-width: 300px;
-  /* Slightly wider for wrapped text */
-  /* overflow: hidden; */
-  /* Commented out - allow full text */
-  /* text-overflow: ellipsis; */
-  /* Commented out - no truncation */
   white-space: normal;
-  /* Allow text wrapping */
   word-wrap: break-word;
-  /* Break long words if needed */
   vertical-align: top;
 }
 

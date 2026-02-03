@@ -555,56 +555,7 @@
       });
     }
 
-    // OLD CSV LOGIC COMMENTED OUT:
-    /*
-    downloadTableData() {
-      const { downloadConfig } = this.config;
-      const { filename = "table-data.csv", includeHeaders = true } =
-        downloadConfig;
 
-      this.downloadAsCSV(filename, includeHeaders);
-    }
-    
-    downloadAsCSV(filename, includeHeaders = true) {
-      const headers = this.processedHeadings;
-      const data = this.filteredData;
-
-      // Convert data to CSV format using displayed values
-      let csvContent = "";
-
-      // Add headers
-      if (includeHeaders) {
-        csvContent += headers.map((header) => `"${header}"`).join(",") + "\n";
-      }
-
-      // Add rows using displayed values
-      data.forEach((row) => {
-        const csvRow = row.map((cell) => {
-          // Get the displayed text content (same as shown in table)
-          const cellValue = this.getCellTextContent(cell);
-
-          // Escape quotes and convert to string
-          const stringValue = String(cellValue).replace(/"/g, '""');
-          return `"${stringValue}"`;
-        });
-
-        csvContent += csvRow.join(",") + "\n";
-      });
-
-      // Create and trigger download
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const link = document.createElement("a");
-      const url = URL.createObjectURL(blob);
-
-      link.setAttribute("href", url);
-      link.setAttribute("download", filename);
-      link.style.visibility = "hidden";
-
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-    */
 
     /**
      * Call user-defined function from global scope
