@@ -63,11 +63,22 @@
   text-transform: uppercase;
   white-space: nowrap;
   border-bottom: 2px solid var(--table-primary-dark);
+  border-right: 1px solid rgba(255, 255, 255, 0.3);
+  /* Column separator */
+}
+
+.table-library-container th:last-child {
+  border-right: none;
+  /* No separator on last column */
 }
 
 .table-library-container th input {
-  margin-top: 6px;
-  width: 100%;
+  display: block;
+  /* Make it a block element */
+  margin: 6px auto 0;
+  /* Center horizontally with auto margins */
+  width: calc(100% - 8px);
+  /* Reduced to prevent overlap with separator */
   padding: 8px 10px;
   font-size: 13px;
   border-radius: 8px;
@@ -86,12 +97,24 @@
 .table-library-container td {
   padding: 12px 14px;
   border-bottom: 1px solid var(--table-border);
+  border-right: 1px solid var(--table-border);
+  /* Column separator */
   font-size: 14px;
   color: var(--table-text-dark);
-  white-space: nowrap;
-  vertical-align: top;
+  /* white-space: nowrap; */
+  /* Commented out to allow wrapping */
+  white-space: normal;
+  text-align: center;
+  /* Center content horizontally */
+  vertical-align: middle;
+  /* Center content vertically */
   transition: all 0.2s ease;
   background: inherit;
+}
+
+.table-library-container td:last-child {
+  border-right: none;
+  /* No separator on last column */
 }
 
 /* Improved row styling for consistent backgrounds */
@@ -224,14 +247,20 @@
   accent-color: var(--table-success);
 }
 
-/* Text display */
+/* Text display - with wrapping */
 .table-library-text {
   display: inline-block;
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  vertical-align: middle;
+  max-width: 300px;
+  /* Slightly wider for wrapped text */
+  /* overflow: hidden; */
+  /* Commented out - allow full text */
+  /* text-overflow: ellipsis; */
+  /* Commented out - no truncation */
+  white-space: normal;
+  /* Allow text wrapping */
+  word-wrap: break-word;
+  /* Break long words if needed */
+  vertical-align: top;
 }
 
 /* Special value styles */
