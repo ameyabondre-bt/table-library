@@ -28,6 +28,13 @@
       this.displayData = []; // Data as shown in table (with modifications)
 
       this.init();
+
+      // Preload SheetJS if configured (for instant first-click downloads)
+      if (this.config.downloadConfig.enable && this.config.downloadConfig.preloadExcelLibrary) {
+        this.loadSheetJS().catch((err) => {
+          console.warn("Failed to preload SheetJS:", err);
+        });
+      }
     }
 
     /**
@@ -105,7 +112,7 @@
       };
     }
 
-    
+
     generateHTML(headings, data) {
       const { tableID, downloadConfig } = this.config;
 
@@ -457,14 +464,36 @@
 
     /**
      * Download table data as Excel (XLSX)
+     * Shows loading indicator on button while SheetJS loads
      */
-    downloadTableData() {
+    async downloadTableData() {
       const { downloadConfig } = this.config;
-      // Default to .xlsx extension for Excel
       const { filename = "table-data.xlsx", includeHeaders = true } =
         downloadConfig;
 
-      this.downloadAsExcel(filename, includeHeaders);
+      // Get the download button to show loading state
+      const position = downloadConfig.position || "top-right";
+      const btn = document.getElementById(
+        `${this.config.tableID}-download-${position}`
+      );
+
+      // Store original button text and show loading
+      let originalText = "";
+      if (btn) {
+        originalText = btn.innerHTML;
+        btn.innerHTML = "⏳ Loading...";
+        btn.disabled = true;
+      }
+
+      try {
+        await this.downloadAsExcel(filename, includeHeaders);
+      } finally {
+        // Restore button state
+        if (btn) {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
+      }
     }
 
     /**
