@@ -105,71 +105,10 @@
       };
     }
 
-    /**
-     * Generate HTML for the table including download button if configured
-     */
+    
     generateHTML(headings, data) {
       const { tableID, downloadConfig } = this.config;
 
-      // OLD LOGIC COMMENTED OUT:
-      /*
-      const topDownloadButtonHTML =
-        downloadConfig.enable &&
-        (downloadConfig.position === "top-right" ||
-          downloadConfig.position === "top-left" ||
-          downloadConfig.position === "top-center")
-          ? this.generateDownloadButton("top")
-          : "";
-
-      const bottomDownloadButtonHTML =
-        downloadConfig.enable && downloadConfig.position === "bottom"
-          ? this.generateDownloadButton("bottom")
-          : "";
-
-      let tableHTML = `
-        <div class="table-library-container">
-          ${topDownloadButtonHTML}
-          <table id="${tableID}">
-            <thead>
-              <tr>
-                ${headings
-                  .map(
-                    (heading, i) => `
-                  <th>
-                    <div>${heading}</div>
-                    <input type="text" placeholder="Filter ${heading}" />
-                  </th>
-                `
-                  )
-                  .join("")}
-              </tr>
-            </thead>
-            <tbody>
-              ${data
-                .map(
-                  (row, rowIndex) => `
-                <tr data-row-index="${rowIndex}">
-                  ${row
-                    .map(
-                      (cell, colIndex) => `
-                    <td data-heading="${headings[colIndex]}">
-                      ${this.renderCell(cell, rowIndex, colIndex)}
-                    </td>
-                  `
-                    )
-                    .join("")}
-                </tr>
-              `
-                )
-                .join("")}
-            </tbody>
-          </table>
-          ${bottomDownloadButtonHTML}
-        </div>
-      `;
-      */
-
-      // NEW LOGIC: Passes specific position and wraps table in scroller
       const topDownloadButtonHTML =
         downloadConfig.enable &&
           (downloadConfig.position === "top-right" ||
