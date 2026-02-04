@@ -28,6 +28,13 @@
       this.displayData = []; // Data as shown in table (with modifications)
 
       this.init();
+
+      // Preload SheetJS if configured (for instant first-click downloads)
+      if (this.config.downloadConfig.enable && this.config.downloadConfig.preloadExcelLibrary) {
+        this.loadSheetJS().catch((err) => {
+          console.warn("Failed to preload SheetJS:", err);
+        });
+      }
     }
 
     /**
@@ -44,13 +51,13 @@
       const options = isDateOnly
         ? { day: "2-digit", month: "short", year: "numeric" }
         : {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: true,
-          };
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        };
 
       return new Intl.DateTimeFormat("en-IN", options).format(dateObj);
     }
@@ -105,18 +112,16 @@
       };
     }
 
-    /**
-     * Generate HTML for the table including download button if configured
-     */
+
     generateHTML(headings, data) {
       const { tableID, downloadConfig } = this.config;
 
       const topDownloadButtonHTML =
         downloadConfig.enable &&
-        (downloadConfig.position === "top-right" ||
-          downloadConfig.position === "top-left" ||
-          downloadConfig.position === "top-center")
-          ? this.generateDownloadButton("top")
+          (downloadConfig.position === "top-right" ||
+            downloadConfig.position === "top-left" ||
+            downloadConfig.position === "top-center")
+          ? this.generateDownloadButton(downloadConfig.position)
           : "";
 
       const bottomDownloadButtonHTML =
@@ -127,41 +132,45 @@
       let tableHTML = `
         <div class="table-library-container">
           ${topDownloadButtonHTML}
-          <table id="${tableID}">
-            <thead>
-              <tr>
-                ${headings
-                  .map(
-                    (heading, i) => `
-                  <th>
-                    <div>${heading}</div>
-                    <input type="text" placeholder="Filter ${heading}" />
-                  </th>
-                `
-                  )
-                  .join("")}
-              </tr>
-            </thead>
-            <tbody>
-              ${data
-                .map(
-                  (row, rowIndex) => `
-                <tr data-row-index="${rowIndex}">
-                  ${row
-                    .map(
-                      (cell, colIndex) => `
-                    <td data-heading="${headings[colIndex]}">
-                      ${this.renderCell(cell, rowIndex, colIndex)}
-                    </td>
+          
+          <div class="table-library-scroller">
+            <table id="${tableID}">
+              <thead>
+                <tr>
+                  ${headings
+          .map(
+            (heading, i) => `
+                    <th>
+                      <div>${heading}</div>
+                      <input type="text" placeholder="Filter ${heading}" />
+                    </th>
                   `
-                    )
-                    .join("")}
+          )
+          .join("")}
                 </tr>
-              `
+              </thead>
+              <tbody>
+                ${data
+          .map(
+            (row, rowIndex) => `
+                  <tr data-row-index="${rowIndex}">
+                    ${row
+                .map(
+                  (cell, colIndex) => `
+                      <td data-heading="${headings[colIndex]}">
+                        ${this.renderCell(cell, rowIndex, colIndex)}
+                      </td>
+                    `
                 )
                 .join("")}
-            </tbody>
-          </table>
+                  </tr>
+                `
+          )
+          .join("")}
+              </tbody>
+            </table>
+          </div>
+
           ${bottomDownloadButtonHTML}
         </div>
       `;
@@ -205,11 +214,9 @@
 
       if (typeof cell === "object" && cell !== null) {
         if (cell.type === "url") {
-          return `<a href="${
-            cell.value
-          }" target="_blank" class="table-library-url">${
-            cell.placeholder || "Open"
-          }</a>`;
+          return `<a href="${cell.value
+            }" target="_blank" class="table-library-url">${cell.placeholder || "Open"
+            }</a>`;
         }
 
         if (cell.type === "button") {
@@ -223,9 +230,8 @@
                       data-row-index="${rowIndex}">
                 ${cell.placeholder || "Action"}
               </button>
-              ${
-                cell.checkbox
-                  ? `
+              ${cell.checkbox
+              ? `
                 <label class="table-library-checkbox-label">
                   <input type="checkbox" ${checkedAttr}
                     class="table-library-action-checkbox"
@@ -234,8 +240,8 @@
                   <span>${cell.checkboxLabel || "Mark"}</span>
                 </label>
               `
-                  : ""
-              }
+              : ""
+            }
             </div>
           `;
         }
@@ -262,9 +268,8 @@
       }
 
       if (typeof cell === "boolean") {
-        return `<span class="table-library-boolean ${
-          cell ? "true" : "false"
-        }">${cell ? "Yes" : "No"}</span>`;
+        return `<span class="table-library-boolean ${cell ? "true" : "false"
+          }">${cell ? "Yes" : "No"}</span>`;
       }
 
       if (typeof cell === "number") {
@@ -387,22 +392,15 @@
           input.addEventListener("input", debounce(filterTable, 300))
         );
 
-      // Download button events for both top and bottom buttons
+      // Download button events - use actual position from config
       if (this.config.downloadConfig.enable) {
-        const topDownloadBtn = document.getElementById(
-          `${tableID}-download-top`
-        );
-        const bottomDownloadBtn = document.getElementById(
-          `${tableID}-download-bottom`
+        const position = this.config.downloadConfig.position || "top-right";
+        const downloadBtn = document.getElementById(
+          `${tableID}-download-${position}`
         );
 
-        if (topDownloadBtn) {
-          topDownloadBtn.addEventListener("click", () =>
-            this.downloadTableData()
-          );
-        }
-        if (bottomDownloadBtn) {
-          bottomDownloadBtn.addEventListener("click", () =>
+        if (downloadBtn) {
+          downloadBtn.addEventListener("click", () =>
             this.downloadTableData()
           );
         }
@@ -465,58 +463,99 @@
     }
 
     /**
-     * Download table data as CSV
+     * Download table data as Excel (XLSX)
+     * Shows loading indicator on button while SheetJS loads
      */
-    downloadTableData() {
+    async downloadTableData() {
       const { downloadConfig } = this.config;
-      const { filename = "table-data.csv", includeHeaders = true } =
+      const { filename = "table-data.xlsx", includeHeaders = true } =
         downloadConfig;
 
-      this.downloadAsCSV(filename, includeHeaders);
+      // Get the download button to show loading state
+      const position = downloadConfig.position || "top-right";
+      const btn = document.getElementById(
+        `${this.config.tableID}-download-${position}`
+      );
+
+      // Store original button text and show loading
+      let originalText = "";
+      if (btn) {
+        originalText = btn.innerHTML;
+        btn.innerHTML = "⏳ Loading...";
+        btn.disabled = true;
+      }
+
+      try {
+        await this.downloadAsExcel(filename, includeHeaders);
+      } finally {
+        // Restore button state
+        if (btn) {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
+      }
     }
 
     /**
-     * Download filtered data as CSV (using displayed values)
+     * Download filtered data as Excel (XLSX) using SheetJS
      */
-    downloadAsCSV(filename, includeHeaders = true) {
+    async downloadAsExcel(filename, includeHeaders = true) {
+      if (typeof XLSX === "undefined") {
+        await this.loadSheetJS();
+      }
+
+      if (typeof XLSX === "undefined") {
+        console.error("Failed to load SheetJS library");
+        return;
+      }
+
       const headers = this.processedHeadings;
       const data = this.filteredData;
-
-      // Convert data to CSV format using displayed values
-      let csvContent = "";
+      const exportData = [];
 
       // Add headers
       if (includeHeaders) {
-        csvContent += headers.map((header) => `"${header}"`).join(",") + "\n";
+        exportData.push(headers);
       }
 
       // Add rows using displayed values
       data.forEach((row) => {
-        const csvRow = row.map((cell) => {
-          // Get the displayed text content (same as shown in table)
-          const cellValue = this.getCellTextContent(cell);
-
-          // Escape quotes and convert to string
-          const stringValue = String(cellValue).replace(/"/g, '""');
-          return `"${stringValue}"`;
+        const rowData = row.map((cell) => {
+          // Get the displayed text content
+          return this.getCellTextContent(cell);
         });
-
-        csvContent += csvRow.join(",") + "\n";
+        exportData.push(rowData);
       });
 
-      // Create and trigger download
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const link = document.createElement("a");
-      const url = URL.createObjectURL(blob);
+      // Create sheet and workbook
+      const ws = XLSX.utils.aoa_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
 
-      link.setAttribute("href", url);
-      link.setAttribute("download", filename);
-      link.style.visibility = "hidden";
-
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Trigger download
+      XLSX.writeFile(wb, filename);
     }
+
+    /**
+     * Dynamically load SheetJS library
+     */
+    loadSheetJS() {
+      return new Promise((resolve, reject) => {
+        if (typeof XLSX !== "undefined") {
+          resolve();
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.src =
+          "https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js";
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error("Failed to load SheetJS"));
+        document.head.appendChild(script);
+      });
+    }
+
+
 
     /**
      * Call user-defined function from global scope

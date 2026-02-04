@@ -20,11 +20,16 @@
 
 .table-library-container {
   width: 100%;
-  overflow-x: auto;
-  /* background: var(--table-bg-main); */
   border-radius: 14px;
-  /* box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05); */
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.table-library-scroller {
+  overflow-x: auto;
+  width: 100%;
+  border-radius: 14px;
 }
 
 /* Fixed table styling to prevent half-white appearance */
@@ -36,11 +41,9 @@
 }
 
 .table-library-container thead {
-  background: linear-gradient(
-    90deg,
-    var(--table-primary-dark),
-    var(--table-primary)
-  );
+  background: linear-gradient(90deg,
+      var(--table-primary-dark),
+      var(--table-primary));
   color: white;
 }
 
@@ -51,11 +54,22 @@
   text-transform: uppercase;
   white-space: nowrap;
   border-bottom: 2px solid var(--table-primary-dark);
+  border-right: 1px solid rgba(255, 255, 255, 0.3);
+  /* Column separator */
+}
+
+.table-library-container th:last-child {
+  border-right: none;
+  /* No separator on last column */
 }
 
 .table-library-container th input {
-  margin-top: 6px;
-  width: 100%;
+  display: block;
+  /* Make it a block element */
+  margin: 6px auto 0;
+  /* Center horizontally with auto margins */
+  width: calc(100% - 8px);
+  /* Reduced to prevent overlap with separator */
   padding: 8px 10px;
   font-size: 13px;
   border-radius: 8px;
@@ -74,12 +88,18 @@
 .table-library-container td {
   padding: 12px 14px;
   border-bottom: 1px solid var(--table-border);
+  border-right: 1px solid var(--table-border);
   font-size: 14px;
   color: var(--table-text-dark);
-  white-space: nowrap;
-  vertical-align: top;
+  white-space: normal;
+  text-align: center;
+  vertical-align: middle;
   transition: all 0.2s ease;
   background: inherit;
+}
+
+.table-library-container td:last-child {
+  border-right: none;
 }
 
 /* Improved row styling for consistent backgrounds */
@@ -215,11 +235,10 @@
 /* Text display */
 .table-library-text {
   display: inline-block;
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  vertical-align: middle;
+  max-width: 300px;
+  white-space: normal;
+  word-wrap: break-word;
+  vertical-align: top;
 }
 
 /* Special value styles */
@@ -280,10 +299,12 @@
 
 .table-library-download-top-right {
   justify-content: flex-end;
+
 }
 
 .table-library-download-top-left {
   justify-content: flex-start;
+
 }
 
 .table-library-download-top-center {
