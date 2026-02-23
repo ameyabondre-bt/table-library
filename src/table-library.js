@@ -19,6 +19,7 @@
         hideColumns: config.hideColumns || [],
         modifyConfig: config.modifyConfig || {},
         downloadConfig: config.downloadConfig || {},
+        widthConfig: config.widthConfig || {},
         ...config,
       };
 
@@ -30,7 +31,10 @@
       this.init();
 
       // Preload SheetJS if configured (for instant first-click downloads)
-      if (this.config.downloadConfig.enable && this.config.downloadConfig.preloadExcelLibrary) {
+      if (
+        this.config.downloadConfig.enable &&
+        this.config.downloadConfig.preloadExcelLibrary
+      ) {
         this.loadSheetJS().catch((err) => {
           console.warn("Failed to preload SheetJS:", err);
         });
@@ -51,13 +55,13 @@
       const options = isDateOnly
         ? { day: "2-digit", month: "short", year: "numeric" }
         : {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-        };
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          };
 
       return new Intl.DateTimeFormat("en-IN", options).format(dateObj);
     }
@@ -86,11 +90,11 @@
           } catch (err) {
             console.error(
               `Error modifying ${heading}[${rowIndex},${colIndex}]:`,
-              err
+              err,
             );
           }
           return modified;
-        })
+        }),
       );
     }
 
@@ -112,66 +116,116 @@
       };
     }
 
-
     generateHTML(headings, data) {
-      const { tableID, downloadConfig } = this.config;
+      const { tableID, downloadConfig, widthConfig } = this.config;
 
-      const topDownloadButtonHTML =
+      const isTopDownload =
         downloadConfig.enable &&
-          (downloadConfig.position === "top-right" ||
-            downloadConfig.position === "top-left" ||
-            downloadConfig.position === "top-center")
-          ? this.generateDownloadButton(downloadConfig.position)
-          : "";
+        (downloadConfig.position === "top-right" ||
+          downloadConfig.position === "top-left" ||
+          downloadConfig.position === "top-center");
 
-      const bottomDownloadButtonHTML =
-        downloadConfig.enable && downloadConfig.position === "bottom"
-          ? this.generateDownloadButton("bottom")
-          : "";
+      const isBottomDownload =
+        downloadConfig.enable && downloadConfig.position === "bottom";
+
+      const topDownloadButtonHTML = isTopDownload
+        ? this.generateDownloadButton(downloadConfig.position)
+        : "";
+
+      const bottomDownloadButtonHTML = isBottomDownload
+        ? this.generateDownloadButton("bottom")
+        : "";
+
+      // Row count badge HTML
+      const totalRows = data.length;
+      const rowCountHTML = `<span class="table-library-row-count" id="${tableID}-row-count">Showing ${totalRows} of ${totalRows} rows</span>`;
+
+      // Build the top bar: row count + download button (if top position)
+      let topBarHTML = "";
+      if (isTopDownload || !isBottomDownload) {
+        // Determine layout based on download button position
+        let topBarJustify = "flex-start"; // default: row count on left
+        let topBarContent = "";
+
+        if (isTopDownload) {
+          if (downloadConfig.position === "top-right") {
+            // Download on right → row count on left
+            topBarContent = `${rowCountHTML}${topDownloadButtonHTML}`;
+            topBarJustify = "space-between";
+          } else if (downloadConfig.position === "top-left") {
+            // Download on left → row count on right
+            topBarContent = `${topDownloadButtonHTML}${rowCountHTML}`;
+            topBarJustify = "space-between";
+          } else {
+            // Download center → row count on left
+            topBarContent = `${rowCountHTML}${topDownloadButtonHTML}`;
+            topBarJustify = "space-between";
+          }
+        } else {
+          // No top download button → row count on left
+          topBarContent = rowCountHTML;
+        }
+
+        topBarHTML = `<div class="table-library-top-bar" style="display:flex;align-items:center;justify-content:${topBarJustify};padding:10px 20px;gap:12px;flex-wrap:wrap;">${topBarContent}</div>`;
+      }
+
+      // Bottom bar: if download is at bottom, show row count opposite
+      let bottomBarHTML = "";
+      if (isBottomDownload) {
+        bottomBarHTML = `<div class="table-library-bottom-bar" style="display:flex;align-items:center;justify-content:space-between;padding:10px 20px;gap:12px;flex-wrap:wrap;">${rowCountHTML}${bottomDownloadButtonHTML}</div>`;
+      }
+
+      // Build width style for th/td
+      const getWidthStyle = (heading) => {
+        if (widthConfig && widthConfig[heading]) {
+          return ` style="width:${widthConfig[heading]}px;min-width:${widthConfig[heading]}px;max-width:${widthConfig[heading]}px;"`;
+        }
+        return "";
+      };
 
       let tableHTML = `
         <div class="table-library-container">
-          ${topDownloadButtonHTML}
+          ${topBarHTML}
           
           <div class="table-library-scroller">
             <table id="${tableID}">
               <thead>
                 <tr>
                   ${headings
-          .map(
-            (heading, i) => `
-                    <th>
+                    .map(
+                      (heading, i) => `
+                    <th${getWidthStyle(heading)}>
                       <div>${heading}</div>
                       <input type="text" placeholder="Filter ${heading}" />
                     </th>
-                  `
-          )
-          .join("")}
+                  `,
+                    )
+                    .join("")}
                 </tr>
               </thead>
               <tbody>
                 ${data
-          .map(
-            (row, rowIndex) => `
+                  .map(
+                    (row, rowIndex) => `
                   <tr data-row-index="${rowIndex}">
                     ${row
-                .map(
-                  (cell, colIndex) => `
-                      <td data-heading="${headings[colIndex]}">
+                      .map(
+                        (cell, colIndex) => `
+                      <td data-heading="${headings[colIndex]}"${getWidthStyle(headings[colIndex])}>
                         ${this.renderCell(cell, rowIndex, colIndex)}
                       </td>
-                    `
-                )
-                .join("")}
+                    `,
+                      )
+                      .join("")}
                   </tr>
-                `
-          )
-          .join("")}
+                `,
+                  )
+                  .join("")}
               </tbody>
             </table>
           </div>
 
-          ${bottomDownloadButtonHTML}
+          ${bottomBarHTML}
         </div>
       `;
 
@@ -214,9 +268,11 @@
 
       if (typeof cell === "object" && cell !== null) {
         if (cell.type === "url") {
-          return `<a href="${cell.value
-            }" target="_blank" class="table-library-url">${cell.placeholder || "Open"
-            }</a>`;
+          return `<a href="${
+            cell.value
+          }" target="_blank" class="table-library-url">${
+            cell.placeholder || "Open"
+          }</a>`;
         }
 
         if (cell.type === "button") {
@@ -230,8 +286,9 @@
                       data-row-index="${rowIndex}">
                 ${cell.placeholder || "Action"}
               </button>
-              ${cell.checkbox
-              ? `
+              ${
+                cell.checkbox
+                  ? `
                 <label class="table-library-checkbox-label">
                   <input type="checkbox" ${checkedAttr}
                     class="table-library-action-checkbox"
@@ -240,8 +297,8 @@
                   <span>${cell.checkboxLabel || "Mark"}</span>
                 </label>
               `
-              : ""
-            }
+                  : ""
+              }
             </div>
           `;
         }
@@ -249,7 +306,7 @@
         return `<pre class="table-library-object">${JSON.stringify(
           cell,
           null,
-          2
+          2,
         )}</pre>`;
       }
 
@@ -257,19 +314,20 @@
         if (cell.length === 0)
           return '<span class="table-library-empty">[]</span>';
         return `<span class="table-library-array" title="${cell.join(
-          ", "
+          ", ",
         )}">[${cell.join(", ")}]</span>`;
       }
 
       if (cell instanceof Date && !isNaN(cell.getTime())) {
         return `<span class="table-library-date">${this.formatDateOrTimestamp(
-          cell
+          cell,
         )}</span>`;
       }
 
       if (typeof cell === "boolean") {
-        return `<span class="table-library-boolean ${cell ? "true" : "false"
-          }">${cell ? "Yes" : "No"}</span>`;
+        return `<span class="table-library-boolean ${
+          cell ? "true" : "false"
+        }">${cell ? "Yes" : "No"}</span>`;
       }
 
       if (typeof cell === "number") {
@@ -322,7 +380,7 @@
       let processed = this.hideColumns(this.config.headings, this.config.data);
       let finalData = this.applyModifications(
         processed.data,
-        processed.headings
+        processed.headings,
       );
 
       this.processedData = finalData;
@@ -381,28 +439,29 @@
 
         // Update filtered data based on visible rows (using display data)
         this.filteredData = visibleRowIndexes.map(
-          (index) => this.displayData[index]
+          (index) => this.displayData[index],
         );
+
+        // Update row count badge
+        this.updateRowCount(visibleRowIndexes.length);
       };
 
       // Filter events
       document
         .querySelectorAll(`#${tableID} thead input`)
         .forEach((input) =>
-          input.addEventListener("input", debounce(filterTable, 300))
+          input.addEventListener("input", debounce(filterTable, 300)),
         );
 
       // Download button events - use actual position from config
       if (this.config.downloadConfig.enable) {
         const position = this.config.downloadConfig.position || "top-right";
         const downloadBtn = document.getElementById(
-          `${tableID}-download-${position}`
+          `${tableID}-download-${position}`,
         );
 
         if (downloadBtn) {
-          downloadBtn.addEventListener("click", () =>
-            this.downloadTableData()
-          );
+          downloadBtn.addEventListener("click", () => this.downloadTableData());
         }
       }
 
@@ -455,7 +514,7 @@
                 fnName + "Checkbox",
                 rowData,
                 rowIndex,
-                cb.checked
+                cb.checked,
               );
             }
           });
@@ -474,7 +533,7 @@
       // Get the download button to show loading state
       const position = downloadConfig.position || "top-right";
       const btn = document.getElementById(
-        `${this.config.tableID}-download-${position}`
+        `${this.config.tableID}-download-${position}`,
       );
 
       // Store original button text and show loading
@@ -555,7 +614,16 @@
       });
     }
 
-
+    /**
+     * Update the row count badge with current visible count
+     */
+    updateRowCount(visibleCount) {
+      const badge = document.getElementById(`${this.config.tableID}-row-count`);
+      if (badge) {
+        const totalRows = this.displayData.length;
+        badge.textContent = `Showing ${visibleCount} of ${totalRows} rows`;
+      }
+    }
 
     /**
      * Call user-defined function from global scope
