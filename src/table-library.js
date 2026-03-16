@@ -20,8 +20,12 @@
         modifyConfig: config.modifyConfig || {},
         downloadConfig: config.downloadConfig || {},
         widthConfig: config.widthConfig || {},
+        height: config.height || null,
+        onRowClick: config.onRowClick || null,
         ...config,
       };
+
+      this.isDraggingScroll = false;
 
       this.processedData = [];
       this.processedHeadings = [];
@@ -183,11 +187,18 @@
         return "";
       };
 
+      const getScrollerStyle = () => {
+        if (!this.config.height) return "";
+        const h = this.config.height;
+        const heightValue = typeof h === "number" ? `${h}px` : h;
+        return ` style="max-height:${heightValue};overflow-y:auto;"`;
+      };
+
       let tableHTML = `
         <div class="table-library-container">
           ${topBarHTML}
           
-          <div class="table-library-scroller">
+          <div class="table-library-scroller"${getScrollerStyle()}>
             <table id="${tableID}">
               <thead>
                 <tr>
@@ -400,6 +411,79 @@
 
       container.innerHTML = this.generateHTML(processed.headings, finalData);
       this.attachEventListeners();
+      this.initScroller();
+    }
+
+    /**
+     * Initialize scroller interactions (Shift+Wheel, Drag-to-Scroll)
+     */
+    initScroller() {
+      const scroller = document
+        .querySelector(`#${this.config.tableID}`)
+        ?.closest(".table-library-scroller");
+      if (!scroller) return;
+
+      let isDown = false;
+      let startX;
+      let scrollLeft;
+      let mouseMoved = false;
+
+      // Shift + wheel -> horizontal scroll
+      scroller.addEventListener("wheel", (e) => {
+        if (e.shiftKey) {
+          e.preventDefault();
+          scroller.scrollLeft += e.deltaY;
+        }
+      });
+
+      // Drag to scroll logic
+      scroller.addEventListener("mousedown", (e) => {
+        // Only start drag if not clicking an interactive element
+        if (
+          e.target.closest(".table-library-action-btn") ||
+          e.target.closest(".table-library-action-checkbox") ||
+          e.target.closest("input") ||
+          e.target.closest("a")
+        ) {
+          return;
+        }
+
+        isDown = true;
+        mouseMoved = false;
+        scroller.classList.add("is-dragging");
+        startX = e.pageX - scroller.offsetLeft;
+        scrollLeft = scroller.scrollLeft;
+      });
+
+      scroller.addEventListener("mouseleave", () => {
+        isDown = false;
+        scroller.classList.remove("is-dragging");
+        setTimeout(() => (this.isDraggingScroll = false), 50);
+      });
+
+      scroller.addEventListener("mouseup", () => {
+        isDown = false;
+        scroller.classList.remove("is-dragging");
+        // Maintain isDraggingScroll briefly to prevent click events from firing immediately after drag
+        setTimeout(() => (this.isDraggingScroll = false), 50);
+      });
+
+      scroller.addEventListener("mousemove", (e) => {
+        if (!isDown) return;
+
+        const x = e.pageX - scroller.offsetLeft;
+        const walk = (x - startX) * 2; // Scroll speed factor
+
+        if (Math.abs(walk) > 5) {
+          mouseMoved = true;
+          this.isDraggingScroll = true;
+        }
+
+        if (this.isDraggingScroll) {
+          e.preventDefault();
+          scroller.scrollLeft = scrollLeft - walk;
+        }
+      });
     }
 
     /**
@@ -519,6 +603,38 @@
             }
           });
         });
+
+      // Row click events
+      const tbody = document.querySelector(`#${tableID} tbody`);
+      if (tbody) {
+        tbody.addEventListener("click", (e) => {
+          const row = e.target.closest("tr");
+          if (!row) return;
+
+          // Don't trigger if we were dragging or if it's an interactive element
+          if (this.isDraggingScroll) return;
+
+          if (
+            e.target.closest(".table-library-action-btn") ||
+            e.target.closest(".table-library-action-checkbox") ||
+            e.target.closest("input") ||
+            e.target.closest("a")
+          ) {
+            return;
+          }
+
+          const rowIndex = parseInt(row.dataset.rowIndex);
+          const rowData = this.processedData[rowIndex];
+
+          // Trigger onRowClick if defined
+          if (
+            this.config.onRowClick &&
+            typeof this.config.onRowClick === "function"
+          ) {
+            this.config.onRowClick(rowData, rowIndex);
+          }
+        });
+      }
     }
 
     /**

@@ -7,7 +7,10 @@
     <!-- <link rel="stylesheet" href="../src/table-library.css" />
     <script src="../src/table-library.js"></script> -->
     <!-- CDN (switch back after testing) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ameyabondre-bt/table-library@main/src/table-library.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/ameyabondre-bt/table-library@main/src/table-library.css"
+    />
     <script src="https://cdn.jsdelivr.net/gh/ameyabondre-bt/table-library@main/src/table-library.js"></script>
     <style>
       body {
@@ -59,14 +62,10 @@
         "Count",
         "Active",
         "Join Date",
-        "Profile",
-        "Actions",
-        "Actions",
-        "Actions",
-        "Actions",
-        "Actions",
-        "Actions",
-        "Actions",
+        "JSON",
+        "Open Profile",
+        "Download Report",
+        "Send Whatsapp",
         "Actions",
         "Actions",
         "Actions",
@@ -74,52 +73,22 @@
 
       const data = [
         [
-          "Pimple Saudagar",
+          "1. Pimple Saudagar",
           37,
           false,
           new Date("2024-01-01"),
           { city: "Mumbai", dept: "HR" },
           {
-            placeholder: "Send WhatsApp",
+            placeholder: "Open Profile",
             type: "button",
-            checkbox: true,
-            checkboxValue: false,
-            function: "sendWhatsApp",
+            function: "openProfile",
           },
           {
-            placeholder: "Send WhatsApp",
+            placeholder: "Download Report",
             type: "button",
             checkbox: true,
-            checkboxValue: false,
-            function: "sendWhatsApp",
-          },
-          {
-            placeholder: "Send WhatsApp",
-            type: "button",
-            checkbox: true,
-            checkboxValue: false,
-            function: "sendWhatsApp",
-          },
-          {
-            placeholder: "Send WhatsApp",
-            type: "button",
-            checkbox: true,
-            checkboxValue: false,
-            function: "sendWhatsApp",
-          },
-          {
-            placeholder: "Send WhatsApp",
-            type: "button",
-            checkbox: true,
-            checkboxValue: false,
-            function: "sendWhatsApp",
-          },
-          {
-            placeholder: "Send WhatsApp",
-            type: "button",
-            checkbox: true,
-            checkboxValue: false,
-            function: "sendWhatsApp",
+            checkboxValue: true,
+            function: "downloadReport",
           },
           {
             placeholder: "Send WhatsApp",
@@ -169,11 +138,11 @@
             function: "downloadReport",
           },
           {
-            placeholder: "Download Report",
+            placeholder: "Send WhatsApp",
             type: "button",
             checkbox: true,
-            checkboxValue: true,
-            function: "downloadReport",
+            checkboxValue: false,
+            function: "sendWhatsApp",
           },
           {
             placeholder: "Download Report",
@@ -190,39 +159,11 @@
             function: "downloadReport",
           },
           {
-            placeholder: "Download Report",
+            placeholder: "Send WhatsApp",
             type: "button",
             checkbox: true,
-            checkboxValue: true,
-            function: "downloadReport",
-          },
-          {
-            placeholder: "Download Report",
-            type: "button",
-            checkbox: true,
-            checkboxValue: true,
-            function: "downloadReport",
-          },
-          {
-            placeholder: "Download Report",
-            type: "button",
-            checkbox: true,
-            checkboxValue: true,
-            function: "downloadReport",
-          },
-          {
-            placeholder: "Download Report",
-            type: "button",
-            checkbox: true,
-            checkboxValue: true,
-            function: "downloadReport",
-          },
-          {
-            placeholder: "Download Report",
-            type: "button",
-            checkbox: true,
-            checkboxValue: true,
-            function: "downloadReport",
+            checkboxValue: false,
+            function: "sendWhatsApp",
           },
         ],
         [
@@ -232,11 +173,23 @@
           new Date("2023-12-15"),
           { city: "Pune", employees: 25 },
           {
+            placeholder: "Open Profile",
+            type: "button",
+            function: "openProfile",
+          },
+          {
             placeholder: "Download Report",
             type: "button",
             checkbox: true,
             checkboxValue: true,
             function: "downloadReport",
+          },
+          {
+            placeholder: "Send WhatsApp",
+            type: "button",
+            checkbox: true,
+            checkboxValue: false,
+            function: "sendWhatsApp",
           },
           {
             placeholder: "Download Report",
@@ -253,53 +206,11 @@
             function: "downloadReport",
           },
           {
-            placeholder: "Download Report",
+            placeholder: "Send WhatsApp",
             type: "button",
             checkbox: true,
-            checkboxValue: true,
-            function: "downloadReport",
-          },
-          {
-            placeholder: "Download Report",
-            type: "button",
-            checkbox: true,
-            checkboxValue: true,
-            function: "downloadReport",
-          },
-          {
-            placeholder: "Download Report",
-            type: "button",
-            checkbox: true,
-            checkboxValue: true,
-            function: "downloadReport",
-          },
-          {
-            placeholder: "Download Report",
-            type: "button",
-            checkbox: true,
-            checkboxValue: true,
-            function: "downloadReport",
-          },
-          {
-            placeholder: "Download Report",
-            type: "button",
-            checkbox: true,
-            checkboxValue: true,
-            function: "downloadReport",
-          },
-          {
-            placeholder: "Download Report",
-            type: "button",
-            checkbox: true,
-            checkboxValue: true,
-            function: "downloadReport",
-          },
-          {
-            placeholder: "Download Report",
-            type: "button",
-            checkbox: true,
-            checkboxValue: true,
-            function: "downloadReport",
+            checkboxValue: false,
+            function: "sendWhatsApp",
           },
         ],
       ];
@@ -318,15 +229,18 @@
 
       // Initialize table
       initTableLibrary({
-        container: "#demo-table",
-        headings: headings,
-        data: data,
-        modifyConfig: modifyConfig,
+        container: "#demo-table", // Table container
+        headings: headings, // Table headings
+        data: data, // Table data
+        modifyConfig: modifyConfig, // Apply user-defined modifications
         widthConfig: {
+          // Set width for each column
           Center: 200,
           Count: 100,
-          "Join Date": 400,
+          "Join Date": 200,
+          Profile: 300,
         },
+        height: "90vh", // We can set max-height here like - "90vh", "200px", 200 if number auto px assign
         downloadConfig: {
           enable: true,
           buttonText: "📥 Download excel",
@@ -335,12 +249,6 @@
           filename: "filtered-results.xlsx",
         },
       });
-      // initTableLibrary({
-      //   container: "#demo-table",
-      //   headings: headings,
-      //   data: data,
-      //   modifyConfig: modifyConfig,
-      // });
 
       // User functions
       function sendWhatsApp(rowData, rowIndex) {

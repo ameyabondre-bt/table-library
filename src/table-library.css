@@ -30,6 +30,15 @@
   overflow-x: auto;
   width: 100%;
   border-radius: 14px;
+  cursor: grab;
+  scrollbar-width: thin; /* For Firefox */
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-library-scroller.is-dragging {
+  cursor: grabbing;
+  scroll-behavior: auto; /* Disable smooth scroll while dragging for better performance */
+  user-select: none; /* Prevent text selection while dragging */
 }
 
 /* Fixed table styling to prevent half-white appearance */
@@ -58,6 +67,15 @@
   border-bottom: 2px solid var(--table-primary-dark);
   border-right: 1px solid rgba(255, 255, 255, 0.3);
   /* Column separator */
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: inherit; /* Use the background from the thead or custom style */
+}
+
+/* Ensure the background gradient works with sticky */
+.table-library-container thead tr th {
+  background: var(--table-primary);
 }
 
 .table-library-container th:last-child {
@@ -115,6 +133,7 @@
 
 .table-library-container tbody tr:hover {
   background-color: var(--table-hover-bg);
+  cursor: pointer;
 }
 
 .table-library-container tbody tr:hover td {
