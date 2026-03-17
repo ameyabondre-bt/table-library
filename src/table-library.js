@@ -25,7 +25,6 @@
         ...config,
       };
 
-      this.isDraggingScroll = false;
 
       this.processedData = [];
       this.processedHeadings = [];
@@ -191,6 +190,9 @@
         if (!this.config.height) return "";
         const h = this.config.height;
         const heightValue = typeof h === "number" ? `${h}px` : h;
+        // Check if it's a fixed height or max height preference
+        // If it's a small value or specific unit, we might want it as height instead of max-height
+        // But to be safe and responsive, we use flex: 1 in CSS and this as max-height if provided
         return ` style="max-height:${heightValue};overflow-y:auto;"`;
       };
 
@@ -423,11 +425,6 @@
         ?.closest(".table-library-scroller");
       if (!scroller) return;
 
-      let isDown = false;
-      let startX;
-      let scrollLeft;
-      let mouseMoved = false;
-
       // Shift + wheel -> horizontal scroll
       scroller.addEventListener("wheel", (e) => {
         if (e.shiftKey) {
@@ -436,54 +433,7 @@
         }
       });
 
-      // Drag to scroll logic
-      scroller.addEventListener("mousedown", (e) => {
-        // Only start drag if not clicking an interactive element
-        if (
-          e.target.closest(".table-library-action-btn") ||
-          e.target.closest(".table-library-action-checkbox") ||
-          e.target.closest("input") ||
-          e.target.closest("a")
-        ) {
-          return;
-        }
-
-        isDown = true;
-        mouseMoved = false;
-        scroller.classList.add("is-dragging");
-        startX = e.pageX - scroller.offsetLeft;
-        scrollLeft = scroller.scrollLeft;
-      });
-
-      scroller.addEventListener("mouseleave", () => {
-        isDown = false;
-        scroller.classList.remove("is-dragging");
-        setTimeout(() => (this.isDraggingScroll = false), 50);
-      });
-
-      scroller.addEventListener("mouseup", () => {
-        isDown = false;
-        scroller.classList.remove("is-dragging");
-        // Maintain isDraggingScroll briefly to prevent click events from firing immediately after drag
-        setTimeout(() => (this.isDraggingScroll = false), 50);
-      });
-
-      scroller.addEventListener("mousemove", (e) => {
-        if (!isDown) return;
-
-        const x = e.pageX - scroller.offsetLeft;
-        const walk = (x - startX) * 2; // Scroll speed factor
-
-        if (Math.abs(walk) > 5) {
-          mouseMoved = true;
-          this.isDraggingScroll = true;
-        }
-
-        if (this.isDraggingScroll) {
-          e.preventDefault();
-          scroller.scrollLeft = scrollLeft - walk;
-        }
-      });
+      // Drag to scroll logic removed to allow text selection
     }
 
     /**
@@ -611,8 +561,6 @@
           const row = e.target.closest("tr");
           if (!row) return;
 
-          // Don't trigger if we were dragging or if it's an interactive element
-          if (this.isDraggingScroll) return;
 
           if (
             e.target.closest(".table-library-action-btn") ||

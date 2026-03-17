@@ -20,26 +20,27 @@
 
 .table-library-container {
   width: 100%;
+  max-width: 100%;
+  height: 100%; /* Fill parent height if fixed */
   border-radius: 14px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* Added to contain children */
 }
 
 .table-library-scroller {
   overflow-x: auto;
   width: 100%;
   border-radius: 14px;
-  cursor: grab;
+  /* cursor: grab; Removed drag-to-scroll */
   scrollbar-width: thin; /* For Firefox */
   -webkit-overflow-scrolling: touch;
+  flex: 1; /* Added to fill remaining space */
+  min-height: 0; /* Added for flex scrolling */
 }
 
-.table-library-scroller.is-dragging {
-  cursor: grabbing;
-  scroll-behavior: auto; /* Disable smooth scroll while dragging for better performance */
-  user-select: none; /* Prevent text selection while dragging */
-}
+/* .table-library-scroller.is-dragging removed */
 
 /* Fixed table styling to prevent half-white appearance */
 .table-library-container table {
